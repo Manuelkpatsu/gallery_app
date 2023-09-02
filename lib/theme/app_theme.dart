@@ -41,9 +41,9 @@ class AppTheme {
       ),
       primaryTextTheme: TextTheme(titleLarge: bitterFont),
       textTheme: TextTheme(
-        titleMedium: bitterFont.apply(color: AppColors.black),
-        titleLarge: bitterFont.apply(color: AppColors.black),
-        bodyMedium: TextStyle(color: AppColors.black),
+        titleMedium: bitterFont.apply(color: AppColors.grey),
+        titleLarge: bitterFont.apply(color: AppColors.grey),
+        bodyMedium: const TextStyle(color: AppColors.grey),
       ),
     );
   }

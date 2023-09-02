@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_app/locator.dart';
+import 'package:gallery_app/model/photo.dart';
 import 'package:gallery_app/repository/photo_repository.dart';
+import 'package:gallery_app/screen/widget/empty_list_indicator.dart';
+import 'package:gallery_app/screen/widget/error_indicator.dart';
+import 'package:gallery_app/screen/widget/photo_tile.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:logger/logger.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -11,26 +16,38 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _counter = 0;
+  final _pagingController = PagingController<int, Photo>(firstPageKey: 1);
+  static const _pageSize = 30;
 
   @override
   void initState() {
-    _getPhotos();
+    _pagingController.addPageRequestListener((pageKey) {
+      _getPhotos(pageKey);
+    });
     super.initState();
   }
 
-  Future<void> _getPhotos() async {
+  Future<void> _getPhotos(int pageKey) async {
     try {
-      await get<PhotoRepository>().getPhotos(page: 1);
+      final photos = await get<PhotoRepository>().getPhotos(page: 1, perPage: _pageSize);
+      final isLastPage = photos.length < _pageSize;
+
+      if (isLastPage) {
+        _pagingController.appendLastPage(photos);
+      } else {
+        final nextPageKey = pageKey + photos.length;
+        _pagingController.appendPage(photos, nextPageKey);
+      }
     } catch (error) {
+      _pagingController.error = error;
       get<Logger>().e(error);
     }
   }
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -40,24 +57,22 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Gallery App'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: RefreshIndicator(
+        onRefresh: () => Future.sync(() => _pagingController.refresh()),
+        child: PagedMasonryGridView<int, Photo>.count(
+          pagingController: _pagingController,
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          builderDelegate: PagedChildBuilderDelegate<Photo>(
+            itemBuilder: (ctx, photo, index) => PhotoTile(photo: photo),
+            firstPageErrorIndicatorBuilder: (context) => ErrorIndicator(
+              error: _pagingController.error,
+              onTryAgain: () => _pagingController.refresh(),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+            noItemsFoundIndicatorBuilder: (context) => const EmptyListIndicator(),
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
