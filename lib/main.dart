@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:gallery_app/repository/photo_repository.dart';
+import 'package:logger/logger.dart';
 
+import 'locator.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+void main() async {
+  setupLocator();
+  await dotenv.load(fileName: ".env");
+
   runApp(const MyApp());
 }
 
@@ -31,6 +38,20 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+
+  @override
+  void initState() {
+    _getPhotos();
+    super.initState();
+  }
+
+  Future<void> _getPhotos() async {
+    try {
+      await get<PhotoRepository>().getPhotos(page: 1);
+    } catch (error) {
+      get<Logger>().e(error);
+    }
+  }
 
   void _incrementCounter() {
     setState(() {

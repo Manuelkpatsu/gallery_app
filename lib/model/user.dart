@@ -17,7 +17,7 @@ class User extends Equatable {
   User.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         name = json['name'],
-        bio = json['bio'],
+        bio = json['bio'] ?? '',
         profileImage = ProfileImage.fromJson(json['profile_image']);
 
   @override

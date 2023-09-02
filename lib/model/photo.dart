@@ -7,7 +7,6 @@ class Photo extends Equatable {
   final String id;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final DateTime promotedAt;
   final String description;
   final int likes;
   final PhotoUrls urls;
@@ -17,7 +16,6 @@ class Photo extends Equatable {
     required this.id,
     required this.createdAt,
     required this.updatedAt,
-    required this.promotedAt,
     required this.description,
     required this.likes,
     required this.urls,
@@ -28,8 +26,7 @@ class Photo extends Equatable {
       : id = json['id'],
         createdAt = DateTime.parse(json['created_at']),
         updatedAt = DateTime.parse(json['updated_at']),
-        promotedAt = DateTime.parse(json['promoted_at']),
-        description = json['description'],
+        description = json['description'] ?? '',
         likes = json['likes'],
         urls = PhotoUrls.fromJson(json['urls']),
         user = User.fromJson(json['user']);
@@ -39,7 +36,6 @@ class Photo extends Equatable {
         id,
         createdAt,
         updatedAt,
-        promotedAt,
         description,
         likes,
         urls,
