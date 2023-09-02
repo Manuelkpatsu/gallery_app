@@ -36,7 +36,7 @@ class AppTheme {
             borderRadius: BorderRadius.all(Radius.circular(6)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 30),
-          minimumSize: const Size.fromHeight(60),
+          minimumSize: const Size.fromHeight(50),
         ),
       ),
       primaryTextTheme: TextTheme(titleLarge: bitterFont),
